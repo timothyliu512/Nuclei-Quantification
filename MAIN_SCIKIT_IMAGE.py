@@ -5,8 +5,8 @@ import numpy as np
 import cv2
 
 # Load image (Becomes Grayscale)
-FILENAME = "test3.jpg"
-FILEOUTPUT = "OutputTest.jpg"
+FILENAME = "test1.jpg"
+FILEOUTPUT = "Test1Output.jpg"
 
 #################################
 # PREPROCESSING IMAGE #
@@ -33,7 +33,7 @@ blobs = feature.blob_log(binary, max_sigma=5, num_sigma=10, threshold=.1)
 # Change Parameters
 HEIGHT = 10
 WIDTH = 10
-DPI = 80
+DPI = 200
 
 fig, ax = plt.subplots(1, 1, figsize=(HEIGHT, WIDTH), dpi=DPI)
 ax.imshow(image, cmap='gray')
@@ -44,7 +44,8 @@ for blob in blobs:
     ax.add_patch(plt.Circle((x, y), area*np.sqrt(2), color='r', fill=False))
 
 # Display the image with blobs highlighted
-#plt.savefig(FILEOUTPUT)                 #save as jpg
 plt.title(f'Number of blobs found: {len(blobs)}')
-plt.show()
+plt.savefig(FILEOUTPUT)                 #save as jpg
+#plt.show()
+print("Success!")
 
