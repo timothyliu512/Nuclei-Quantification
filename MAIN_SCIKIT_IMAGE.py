@@ -2,33 +2,49 @@ import matplotlib.pyplot as plt
 from skimage import feature, io, filters
 from skimage.color import rgb2gray
 import numpy as np
+import cv2
 
 # Load image (Becomes Grayscale)
-image = io.imread("test3.jpg", as_gray=True)
+FILENAME = "test3.jpg"
+FILEOUTPUT = "OutputTest.jpg"
 
-#Binary filter
+#################################
+# PREPROCESSING IMAGE #
+#################################
+
+#Read in image
+image = io.imread(FILENAME, as_gray=True)
+
+#Binary ThresholdFiltering
 thresh = filters.threshold_otsu(image)
 binary = image > thresh
 
-# Detect blobs
-blobs = feature.blob_log(binary, max_sigma=30, num_sigma=10, threshold=.1)
+# Detect blobs (nuclei)
+blobs = feature.blob_log(binary, max_sigma=5, num_sigma=10, threshold=.1)
 
-# Print number of blobs found
-print('Number of blobs found:', len(blobs))
+# Print number of blobs(nuclei) found
+# print('# of Nuclei:', len(blobs))
+# Number of Nuclei: len(blobs)
 
-# Create figure and axes
-fig, ax = plt.subplots(1, 1, figsize=(10, 10))
+#################################
+# PLOTTING #
+#################################
 
-# Display original image
+# Change Parameters
+HEIGHT = 10
+WIDTH = 10
+DPI = 80
+
+fig, ax = plt.subplots(1, 1, figsize=(HEIGHT, WIDTH), dpi=DPI)
 ax.imshow(image, cmap='gray')
 
-# Draw a red circle on top of the original image for each blob detected
+# Draw circles on top of original image for each blob(nuclei) detected
 for blob in blobs:
     y, x, area = blob
     ax.add_patch(plt.Circle((x, y), area*np.sqrt(2), color='r', fill=False))
 
 # Display the image with blobs highlighted
-
+#plt.savefig(FILEOUTPUT)                 #save as jpg
 plt.title(f'Number of blobs found: {len(blobs)}')
-plt.savefig("Test3Output.jpg") #save as jpg
-#plt.show()
+plt.show()
+
