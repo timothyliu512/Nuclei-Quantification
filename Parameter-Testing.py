@@ -2,27 +2,28 @@ import cv2
 import numpy as np
 
 # Read image
-im = cv2.imread("test1.jpg", cv2.IMREAD_GRAYSCALE)
+im = cv2.imread("test2.jpg", cv2.IMREAD_GRAYSCALE)
 
 # IMAGE PREPROCESSING
 
-# Blur image to reduce noise
-blurred = cv2.GaussianBlur(im, (9, 9), 0)
+kernel = np.array([[-1, -1, -1],
+                   [-1, 9,-1],
+                   [-1, -1, -1]])
+image_sharp = cv2.filter2D(src=im, ddepth=-1, kernel=kernel)
 
-# Enhance contrast
-equalized = cv2.equalizeHist(blurred)
+#Binary Threshold Filtering
+ret,thresh1 = cv2.threshold(im,127,255,cv2.THRESH_BINARY)
 
-# Threshold image to binary using Adaptive Thresholding
-binary = cv2.adaptiveThreshold(equalized, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 15, .7)
+preproc = cv2.cvtColor(thresh1, cv2.COLOR_GRAY2BGR) #Converts to equal dimension
 
 # Perform opening to remove noise and separate nuclei
 kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
-opened = cv2.morphologyEx(binary, cv2.MORPH_OPEN, kernel)
+opened = cv2.morphologyEx(preproc, cv2.MORPH_OPEN, kernel)
 
 # Save preprocessed image
 preproc = opened
 
-preproc = cv2.cvtColor(preproc, cv2.COLOR_GRAY2BGR)  # Converts to equal dimension
+#preproc = cv2.cvtColor(preproc, cv2.COLOR_GRAY2BGR)  # Converts to equal dimension
 
 # Loop over different minConvexity values
 minInertia_values = np.arange(0.01, 1.1, 0.05)  # Change this to the values you want to try
@@ -33,11 +34,11 @@ for minInertia in minInertia_values:
     params = cv2.SimpleBlobDetector_Params()
 
     # Change thresholds
-    params.minThreshold = 35
-    params.maxThreshold = 200
+    params.minThreshold = 1
+    params.maxThreshold = 2000
 
     # Filter by Area
-    params.filterByArea = True
+    params.filterByArea = False
     params.minArea = 10
     params.maxArea = 1000
 
@@ -46,7 +47,7 @@ for minInertia in minInertia_values:
     params.minCircularity = 0.01
 
     # Filter by Convexity
-    params.filterByConvexity = True
+    params.filterByConvexity = False
     params.minConvexity = 0.71  # Set minConvexity to current value
 
     # Filter by Inertia
@@ -64,12 +65,12 @@ for minInertia in minInertia_values:
     keypoints = detector.detect(opened)
 
     # Draw detected blobs as red circles
-    im_with_keypoints = cv2.drawKeypoints(im, keypoints, np.array([]), (0, 0, 255),
+    im_with_keypoints = cv2.drawKeypoints(preproc, keypoints, np.array([]), (0, 0, 255),
                                           cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
     # Show images
     im_bgr = cv2.cvtColor(im, cv2.COLOR_GRAY2BGR)
-    combined = np.concatenate((im_bgr, preproc, im_with_keypoints), axis=1)
+    combined = np.concatenate((preproc, im_with_keypoints), axis=1)
     cv2.imshow(f"Images with minConvexity={minInertia}:", combined)
 
     cv2.waitKey(0)
