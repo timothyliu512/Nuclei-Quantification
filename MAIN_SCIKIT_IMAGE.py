@@ -43,8 +43,8 @@ for blob in blobs:
     y, x, area = blob
     ax.add_patch(plt.Circle((x, y), area*np.sqrt(2), color='r', fill=False))
 
-# Display the image with blobs highlighted
-plt.title(f'Number of blobs found: {len(blobs)}')
+# Display the image with blobs(nuclei) highlighted
+plt.title(f'Number of Nuclei found: {len(blobs)}')
 plt.savefig(FILEOUTPUT)                 #save as jpg
 #plt.show()
 print("Success!")
